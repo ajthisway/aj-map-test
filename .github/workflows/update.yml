@@ -30,8 +30,6 @@ jobs:
         run: |
           git config --global user.name "aj-map-bot"
           git config --global user.email "aj@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
-          git pull origin main
           git add test_map.geojson
           git commit -m "Update test map" || echo "No changes"
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
+          git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }} HEAD:main
