@@ -1,69 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Live Garmin Test Map</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta charset="utf-8" />
+  <title>Leaflet Garmin Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Load Mapbox CSS and JS FIRST -->
- <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+  <!-- Leaflet CSS & JS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-+3Ucz4zME2xA0eD+aVWoqkSyK8j8C+x0Wv+UnD8B+7E="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-Cc9e4HnCTtIejP1Vw2F1RL3S3KpM1w+fl1CqfPspP1E="
+    crossorigin=""
+  ></script>
 
   <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { height: 100%; width: 100%; }
   </style>
 </head>
 <body>
 <div id="map"></div>
 
 <script>
-  mapboxgl.accessToken = 'pk.eyJ1IjoiYWp0aGlzd2F5IiwiYSI6ImNtOHZlZmc2YTB2OTEybnI1ZGcyemtsbmoifQ.g2z2Lp2Ko0SsAnV7BdYyYg';
+  const map = L.map('map').setView([0, 0], 2);
 
-  const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v12',
-    center: [0, 0],
-    zoom: 2
-  });
+  // Add base layer (OpenStreetMap)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
 
+  // Load GeoJSON and display markers and line
   fetch('https://raw.githubusercontent.com/ajthisway/aj-map-test/main/test_map.geojson')
     .then(res => res.json())
     .then(data => {
-      const bounds = new mapboxgl.LngLatBounds();
-      const coordinates = [];
+      const coords = [];
 
-      data.features.forEach(feature => {
-        const [lon, lat] = feature.geometry.coordinates;
-        coordinates.push([lon, lat]);
+      L.geoJSON(data, {
+        pointToLayer: function (feature, latlng) {
+          coords.push([latlng.lat, latlng.lng]);
+          return L.marker(latlng);
+        }
+      }).addTo(map);
 
-        new mapboxgl.Marker()
-          .setLngLat([lon, lat])
-          .addTo(map);
-
-        bounds.extend([lon, lat]);
-      });
-
-      map.on('load', () => {
-        if (coordinates.length >= 2) {
-          map.addSource('route', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              geometry: {
-                type: 'LineString',
-                coordinates: coordinates
-              }
-            }
-          });
-
-          map.addLayer({
-            id: 'route-line',
-            type: 'line',
-            source: 'route',
-            layout: {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            paint: {
-              'line-color': '#ff0000',
+      if (coords.length > 1) {
+        const polyline = L.polyline(coords, { color: 'red', weight: 4 }).addTo(map);
+        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+      } else if (coords.length === 1) {
+        map.setView(coords[0], 12);
+      }
+    });
+</script>
+</body>
+</html>
