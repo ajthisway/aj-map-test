@@ -24,21 +24,18 @@ jobs:
       - name: Run script
         run: python update_map.py
 
-      - name: Commit and push GeoJSON
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+      - name: Commit and push updated GeoJSON
         run: |
-          # Set Git username and email
           git config --global user.name "aj-map-bot"
           git config --global user.email "aj@users.noreply.github.com"
-
-          # Set the remote URL to use the personal access token for authentication
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
-
-          # Pull the latest changes from the repository using the access token
-          git pull https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
-
-          # Add, commit, and push changes using the access token
+          
+          # Use the built-in GITHUB_TOKEN provided by GitHub Actions
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          
+          # Pull the latest changes from the repository using the built-in token
+          git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
+          
+          # Add, commit, and push changes using the built-in token
           git add test_map.geojson
           git commit -m "Update test map" || echo "No changes"
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
