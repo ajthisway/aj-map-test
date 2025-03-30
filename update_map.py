@@ -1,13 +1,18 @@
 import requests
 import xml.etree.ElementTree as ET
 import json
+from requests.auth import HTTPBasicAuth
 
-# Live feed URL
+# Define username and password for Basic HTTP Authentication
+USERNAME = "ajthisway"  # Replace with your Garmin Explore username
+PASSWORD = "MaxiPup2021"  # Replace with your Garmin Explore password
+
+# Live feed URL (ensure it is correct)
 FEED_URL = "https://share.garmin.com/Feed/ShareLoader/ajthisway"
 OUTPUT_FILE = "test_map.geojson"
 
-# Fetch the live KML feed
-response = requests.get(FEED_URL)
+# Fetch the live KML feed with authentication
+response = requests.get(FEED_URL, auth=HTTPBasicAuth(USERNAME, PASSWORD))
 response.raise_for_status()
 
 # Debug: Print the content of the feed to verify it is being fetched
