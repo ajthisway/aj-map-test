@@ -1,41 +1,45 @@
-name: Update Live Test Map
+name: Update Test Map
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # every 30 minutes
+    - cron: "*/30 * * * *"  # Runs every 30 minutes (or adjust to your preferred schedule)
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run script
+      # Step 4: Run the update script to fetch data and update GeoJSON
+      - name: Run update script
         run: python update_map.py
 
+      # Step 5: Commit and push the updated GeoJSON file
       - name: Commit and push updated GeoJSON
         run: |
           git config --global user.name "aj-map-bot"
           git config --global user.email "aj@users.noreply.github.com"
           
-          # Use the built-in GITHUB_TOKEN provided by GitHub Actions
+          # Use GitHub's automatically provided GITHUB_TOKEN for authentication
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          
-          # Pull the latest changes from the repository using the built-in token
+
+          # Pull the latest changes from the repository
           git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
-          
-          # Add, commit, and push changes using the built-in token
+
+          # Add, commit, and push the updated .geojson file
           git add test_map.geojson
           git commit -m "Update test map" || echo "No changes"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
