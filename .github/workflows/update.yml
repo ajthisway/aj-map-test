@@ -28,16 +28,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          # Set Git username and email
           git config --global user.name "aj-map-bot"
           git config --global user.email "aj@users.noreply.github.com"
-          
-          # Set the remote URL explicitly with the token for authentication
+
+          # Set the remote URL to use the personal access token for authentication
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
-          
-          # Pull the latest changes from the remote repository
+
+          # Pull the latest changes from the repository using the access token
           git pull https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
-          
-          # Add the updated file, commit and push changes
+
+          # Add, commit, and push changes using the access token
           git add test_map.geojson
           git commit -m "Update test map" || echo "No changes"
           git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
