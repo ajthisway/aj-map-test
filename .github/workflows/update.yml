@@ -34,4 +34,4 @@ jobs:
           git pull origin main
           git add test_map.geojson
           git commit -m "Update test map" || echo "No changes"
-          git push origin main
+          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
