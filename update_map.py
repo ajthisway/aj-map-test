@@ -4,7 +4,7 @@ import json
 from requests.auth import HTTPBasicAuth
 
 # Define username and password for Basic HTTP Authentication
-USERNAME = "ajthisway"  # Replace with your Garmin Explore username
+USERNAME = "awilsontaylor@me.com"  # Replace with your Garmin Explore username
 PASSWORD = "MaxiPup2021"  # Replace with your Garmin Explore password
 
 # Live feed URL (ensure it is correct)
