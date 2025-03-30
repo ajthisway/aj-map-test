@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Ensures GITHUB_TOKEN has write permissions to push changes
+
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repo
@@ -27,17 +30,17 @@ jobs:
       - name: Run update script
         run: python update_map.py
 
-      # Step 5: Commit and push the updated GeoJSON file using GitHub's built-in token
+      # Step 5: Commit and push the updated GeoJSON file using GITHUB_TOKEN
       - name: Commit and push updated GeoJSON
         run: |
           git config --global user.name "aj-map-bot"
           git config --global user.email "aj@users.noreply.github.com"
           
-          # Set remote URL to use the default GITHUB_TOKEN for authentication
+          # Force the remote URL to always use the GITHUB_TOKEN for authentication
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
-          # Pull the latest changes from the repository using the built-in GITHUB_TOKEN
-          git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
+          # Pull the latest changes from the repository using GITHUB_TOKEN
+          git pull origin main
 
           # Add, commit, and push changes using the GITHUB_TOKEN for push
           git add test_map.geojson
