@@ -3,35 +3,38 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import json
 
+# KML feed URL (same link)
 FEED_URL = "https://share.garmin.com/Feed/Share/ajthisway"
 OUTPUT_FILE = "test_map.geojson"
 
+# Fetch the KML feed
 response = requests.get(FEED_URL)
 response.raise_for_status()
 
 root = ET.fromstring(response.text)
-namespace = {'atom': 'http://www.w3.org/2005/Atom'}
+namespace = {
+    'kml': 'http://www.opengis.net/kml/2.2'
+}
 
 points = []
 
-for entry in root.findall('atom:entry', namespace):
-    title = entry.find('atom:title', namespace).text
-    updated = entry.find('atom:updated', namespace).text
-
+for placemark in root.findall('.//kml:Placemark', namespace):
     try:
-        lat_lon = title.replace("Lat: ", "").replace(" Lon: ", ",").split(",")
-        lat = float(lat_lon[0])
-        lon = float(lat_lon[1])
-        timestamp = datetime.strptime(updated, "%Y-%m-%dT%H:%M:%SZ")
+        coords = placemark.find('.//kml:Point/kml:coordinates', namespace).text.strip()
+        lon, lat, *_ = map(float, coords.split(','))
+
+        timestamp_elem = placemark.find('.//kml:TimeStamp/kml:when', namespace)
+        timestamp = timestamp_elem.text if timestamp_elem is not None else None
 
         points.append({
             "lat": lat,
             "lon": lon,
-            "timestamp": timestamp.isoformat()
+            "timestamp": timestamp
         })
     except Exception as e:
-        print(f"Skipping invalid entry: {title} ({e})")
+        print(f"Skipping bad placemark: {e}")
 
+# Build GeoJSON
 geojson = {
     "type": "FeatureCollection",
     "features": [
