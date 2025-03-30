@@ -30,8 +30,14 @@ jobs:
         run: |
           git config --global user.name "aj-map-bot"
           git config --global user.email "aj@users.noreply.github.com"
+          
+          # Set the remote URL explicitly with the token for authentication
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
-          git pull origin main
+          
+          # Pull the latest changes from the remote repository
+          git pull https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
+          
+          # Add the updated file, commit and push changes
           git add test_map.geojson
           git commit -m "Update test map" || echo "No changes"
           git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} main
